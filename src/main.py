@@ -22,7 +22,8 @@ api = Api(blueprint,
           version='v0.1',
           description='RESTful API',
           default='Available Methods/Endpoints',
-          default_label=None)
+          default_label=None,
+          ordered=True)
 app.register_blueprint(blueprint)
 
 MIGRATE = Migrate(app, db)
