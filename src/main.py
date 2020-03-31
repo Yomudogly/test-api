@@ -9,6 +9,9 @@ from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
 from models import db, Sizes_shoes, Product_detail
+import re
+# from alembic import op
+# from sqlalchemy import func
 
 
 app = Flask(__name__)
@@ -19,8 +22,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 blueprint = Blueprint('api', __name__)
 api = Api(blueprint,
           title='SnkrsDen API',
-          version='v0.1',
-          description='RESTful API',
+          version='v0.2',
+          description='RESTFUL API',
           default='Available Methods/Endpoints',
           default_label=None,
           ordered=True)
@@ -84,7 +87,7 @@ class AllProductDetails(Resource):
         return jsonify(get_paginated_list(products, '/product-details', 
             start=request.args.get('start', 1), 
             limit=request.args.get('limit', 20)
-    ))
+        ))
         
 
 @api.route('/product-details/<int:id>')
@@ -97,6 +100,56 @@ class ProductDetailsById(Resource):
             return jsonify(products.serialize())
         else: 
             abort (404, f'Product detail with id {id} does not exist')
+            
+
+@api.route('/product-details/slug/<string:slug>')
+class ProductDetailsBySlug(Resource):
+    
+    # GET PRODUCT DETAILS BY SLUG
+    def get(self, slug: str):
+        products = Product_detail.query.filter(Product_detail.slug.contains(slug))
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, '/product-details/slug/<string:slug>', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+            
+            
+@api.route('/product-details/colorway/<string:colorway>', '/product-details/colorway/<string:colorway>+<string:colorway_>' )
+class ProductDetailsByColorway(Resource):
+    
+    # GET PRODUCT DETAILS BY COLORWAY
+    def get(self, colorway: str, colorway_=None):
+        products = None
+        if colorway_ is None:
+            products = Product_detail.query.filter(Product_detail.colorway.contains(colorway))
+            # products = Product_detail.query.filter(Product_detail.colorway.op('regexp')(r'{}'.format(colorway))).all()
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                
+                return jsonify(get_paginated_list(products, '/product-details/colorway/<string:colorway>', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else: 
+                abort (400)
+        else:
+            products = Product_detail.query.filter(Product_detail.colorway.contains(colorway)).filter(Product_detail.colorway.contains(colorway_))
+            # products = Product_detail.query.filter(Product_detail.colorway.op('regexp')(r'{}'.format(colorway))).all()
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                
+                return jsonify(get_paginated_list(products, '/product-details/colorway/<string:colorway>+<string:colorway_>', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else: 
+                abort (400)
+            
 
 
 
@@ -128,7 +181,7 @@ class SizesById(Resource):
             abort (404, f'Size with id {id} does not exist')
             
 
-@api.route('/sizes-brand-id/<int:brand_id>')
+@api.route('/sizes/brand-id/<int:brand_id>')
 class SizesByBrandId(Resource):
     
     # GET SIZES BY BRAND ID
@@ -141,7 +194,7 @@ class SizesByBrandId(Resource):
             abort (404, f'Sizes with brand id {brand_id} do not exist')
             
 
-@api.route('/sizes-type-id/<string:sizes_types_id>')
+@api.route('/sizes/type-id/<string:sizes_types_id>')
 class SizesByTypeId(Resource):
     
     # GET SIZES BY TYPE ID
@@ -154,7 +207,7 @@ class SizesByTypeId(Resource):
             abort (404, f'Sizes with type id {sizes_types_id} do not exist')
   
  
-@api.route('/sizes-us/<string:us>')
+@api.route('/sizes/us/<string:us>')
 class SizesByUS(Resource):
     
     # GET SIZES BY US
@@ -167,7 +220,7 @@ class SizesByUS(Resource):
             abort (404, f'Sizes with us {us} do not exist')
         
 
-@api.route('/sizes-uk/<string:uk>')
+@api.route('/sizes/uk/<string:uk>')
 class SizesByUK(Resource):
     
     # GET SIZES BY UK
@@ -181,7 +234,7 @@ class SizesByUK(Resource):
     
 
 
-@api.route('/sizes-cm/<float:cm>')
+@api.route('/sizes/cm/<float:cm>')
 class SizesByCM(Resource):
     
     # GET SIZES BY CM --  RQUIRES FLOAT NUMBER AS A PARAMETER
@@ -194,7 +247,7 @@ class SizesByCM(Resource):
             abort (404, f'Sizes with cm {cm} do not exist')
             
             
-@api.route('/sizes-europe/<float:europe>')
+@api.route('/sizes/europe/<float:europe>')
 class SizesByEurope(Resource):
     
     # GET SIZES BY EUROPE --  RQUIRES FLOAT NUMBER AS A PARAMETER
@@ -207,7 +260,7 @@ class SizesByEurope(Resource):
             abort (404, f'Sizes with europe size {europe} do not exist')
             
             
-@api.route('/sizes-inch/<float:inch>')
+@api.route('/sizes/inch/<float:inch>')
 class SizesByInch(Resource):
     
     # GET SIZES BY INCH --  RQUIRES FLOAT NUMBER AS A PARAMETER
@@ -220,7 +273,7 @@ class SizesByInch(Resource):
             abort (404, f'Sizes with inch {inch} do not exist')
             
             
-@api.route('/sizes-woman/<float:woman>')
+@api.route('/sizes/woman/<float:woman>')
 class SizesByWoman(Resource):
     
     # GET SIZES BY WOMAN --  RQUIRES FLOAT NUMBER AS A PARAMETER
