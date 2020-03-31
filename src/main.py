@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
-from models import db, Sizes_shoes
+from models import db, Sizes_shoes, Product_detail
 
 
 app = Flask(__name__)
@@ -35,6 +35,7 @@ CORS(app)
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
+
 
 ### PAGINATION #####
 
@@ -67,10 +68,36 @@ def get_paginated_list(results, url, start, limit):
     obj['results'] = results[(start - 1):(start - 1 + limit)]
     return obj
 
-
-
-
 #####################
+
+
+##### API PRODUCT DETAILS #######
+
+@api.route('/product-details')
+class AllProductDetails(Resource):
+    
+    # GET ALL PRODUCT DETAILS
+    def get(self):
+        products = Product_detail.query.all()
+        products = list(map(lambda x: x.serialize(), products))
+        
+        return jsonify(get_paginated_list(products, '/product-details', 
+            start=request.args.get('start', 1), 
+            limit=request.args.get('limit', 20)
+    ))
+        
+
+@api.route('/product-details/<int:id>')
+class ProductDetailsById(Resource):
+    
+    # PRODUCT DETAILS BY ID
+    def get(self, id: int):
+        products = Product_detail.query.get(id)
+        if products:
+            return jsonify(products.serialize())
+        else: 
+            abort (404, f'Product detail with id {id} does not exist')
+
 
 
 ### API SIZES ###
