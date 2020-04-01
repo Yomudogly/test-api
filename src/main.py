@@ -236,7 +236,7 @@ class ProductDetailsByStyle(Resource):
     
     # GET PRODUCT DETAILS BY RETAIL PRICE
     def get(self, retail_price: str):
-        products = Product_detail.query.filter(Product_detail.retail_price.contains(retail_price))
+        products = Product_detail.query.filter_by(retail_price=retail_price).all()
         if products:
             products = list(map(lambda x: x.serialize(), products))
             
@@ -248,6 +248,82 @@ class ProductDetailsByStyle(Resource):
         else: 
             abort (400)
             
+#####  MODEL  #####         
+@api.route('/product-details/model/<string:model>', 
+           '/product-details/model/<string:model>+<string:model_>',
+           '/product-details/model/<string:model>+<string:model_>+<string:model_1>' )
+class ProductDetailsByColorway(Resource):
+    
+    # GET PRODUCT DETAILS BY MODEL
+    def get(self, model: str, model_=None, model_1=None):
+        products = None
+        if model_ is None and model_1 is None:
+            products = Product_detail.query.filter(
+                Product_detail.model.contains(model))
+            # products = Product_detail.query.filter(Product_detail.model.op('regexp')(r'{}'.format(model).all()
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                
+                return jsonify(get_paginated_list(products,
+                    '', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else: 
+                abort (400)
+        elif model_1 is None:
+            products = Product_detail.query.filter(
+                Product_detail.model.contains(model)).filter(
+                Product_detail.model.contains(model_))
+           
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                
+                return jsonify(get_paginated_list(products,
+                    '', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else: 
+                abort (400)
+        else:
+            products = Product_detail.query.filter(
+                Product_detail.model.contains(model)).filter(
+                Product_detail.model.contains(model_)).filter(
+                Product_detail.model.contains(model_1))
+           
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                
+                return jsonify(get_paginated_list(products, 
+                    '', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else: 
+                abort (400)
+                
+#####  RETAIL SIZE #####
+@api.route('/product-details/size/<float:size>')
+class ProductDetailsByStyle(Resource):
+    
+    # GET PRODUCT DETAILS BY RETAIL PRICE
+    def get(self, size: float):
+        products = Product_detail.query.filter_by(size=size).all()
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                '', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+            
+
+
+
 
 
 
