@@ -60,13 +60,13 @@ def get_paginated_list(results, url, start, limit):
     else:
         start_copy = max(1, start - limit)
         limit_copy = start - 1
-        obj['previous'] = url + '?start=%d&limit=%d' % (start_copy, limit_copy)
+        obj['previous'] = url + 'start=%d&limit=%d' % (start_copy, limit_copy)
     # make next url
     if start + limit > count:
         obj['next'] = ''
     else:
         start_copy = start + limit
-        obj['next'] = url + '?start=%d&limit=%d' % (start_copy, limit)
+        obj['next'] = url + 'start=%d&limit=%d' % (start_copy, limit)
     # finally extract result according to bounds
     obj['results'] = results[(start - 1):(start - 1 + limit)]
     return obj
@@ -247,61 +247,38 @@ class ProductDetailsByPrice(Resource):
             ))
         else: 
             abort (400)
-            
-#####  MODEL  #####         
-@api.route('/product-details/model/<string:model>', 
-           '/product-details/model/<string:model>+<string:model_>',
-           '/product-details/model/<string:model>+<string:model_>+<string:model_1>' )
-class ProductDetailsByModel(Resource):
+             
+
+##### MODEL #####
+@api.route('/product-details/model')
+class ProductDetailsByModel(Resource): 
     
-    # GET PRODUCT DETAILS BY MODEL
-    def get(self, model: str, model_=None, model_1=None):
-        products = None
-        if model_ is None and model_1 is None:
-            products = Product_detail.query.filter(
-                Product_detail.model.contains(model))
-            # products = Product_detail.query.filter(Product_detail.model.op('regexp')(r'{}'.format(model).all()
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products,
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
-        elif model_1 is None:
-            products = Product_detail.query.filter(
-                Product_detail.model.contains(model)).filter(
-                Product_detail.model.contains(model_))
-           
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products,
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
+    ### GET PRODUCT DETAILS BY MODELS AS ARGUMENTS  ####
+    def get(self):
+        
+        query = request.args.get('query')
+        args = list(query.split(","))
+        
+        if len(args) is 0:
+            products = None
+        elif len(args) is 1:
+            products = Product_detail.query.filter(Product_detail.model.contains(args[0]))
         else:
-            products = Product_detail.query.filter(
-                Product_detail.model.contains(model)).filter(
-                Product_detail.model.contains(model_)).filter(
-                Product_detail.model.contains(model_1))
-           
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products, 
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
+            products = Product_detail.query.filter(Product_detail.model.contains(args[0]))
+            for i in range(1, len(args)):
+                products = products.filter(Product_detail.model.contains(args[i]))
+            
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+                    
+            return jsonify(get_paginated_list(products,
+                '', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+            
                 
 ##### SIZE #####
 @api.route('/product-details/size/<float:size>')
