@@ -232,7 +232,7 @@ class ProductDetailsByStyle(Resource):
             
 #####  RETAIL PRICE  #####
 @api.route('/product-details/retail-price/<string:retail_price>')
-class ProductDetailsByStyle(Resource):
+class ProductDetailsByPrice(Resource):
     
     # GET PRODUCT DETAILS BY RETAIL PRICE
     def get(self, retail_price: str):
@@ -252,7 +252,7 @@ class ProductDetailsByStyle(Resource):
 @api.route('/product-details/model/<string:model>', 
            '/product-details/model/<string:model>+<string:model_>',
            '/product-details/model/<string:model>+<string:model_>+<string:model_1>' )
-class ProductDetailsByColorway(Resource):
+class ProductDetailsByModel(Resource):
     
     # GET PRODUCT DETAILS BY MODEL
     def get(self, model: str, model_=None, model_1=None):
@@ -303,9 +303,9 @@ class ProductDetailsByColorway(Resource):
             else: 
                 abort (400)
                 
-#####  RETAIL SIZE #####
+##### SIZE #####
 @api.route('/product-details/size/<float:size>')
-class ProductDetailsByStyle(Resource):
+class ProductDetailsBySize(Resource):
     
     # GET PRODUCT DETAILS BY RETAIL PRICE
     def get(self, size: float):
@@ -321,9 +321,63 @@ class ProductDetailsByStyle(Resource):
         else: 
             abort (400)
             
+            
+#####  LAST SALE #####
+@api.route('/product-details/last-sale/<int:last_sale>')
+class ProductDetailsByLastSale(Resource):
+    
+    # GET PRODUCT DETAILS BY RETAIL PRICE
+    def get(self, last_sale: int):
+        products = Product_detail.query.filter_by(last_sale=last_sale).all()
+        # products = Product_detail.query.filter(Product_detail.last_sale<=last_sale) -- for queries less then or more then !!!
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                '', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
 
-
-
+#####  RELEASE DATE #####
+@api.route('/product-details/release-date/<string:release>')
+class ProductDetailsByReleaseDate(Resource):
+    # release should be a string in format "YYYY-MM-DD" to represent full date !!!
+    # GET PRODUCT DETAILS BY RETAIL PRICE
+    def get(self, release: str):
+        products = Product_detail.query.filter(Product_detail.release_date.contains(release))
+        # products = Product_detail.query.filter(Product_detail.release_date<=release) -- for queries less then or more then !!!
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                '', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+            
+#####  LAST SALE DATE #####
+@api.route('/product-details/last-sale-date/<string:date>')
+class ProductDetailsByReleaseDate(Resource):
+    # date should be a string in format "YYYY-MM-DD" to represent full date !!!
+    # GET PRODUCT DETAILS BY RETAIL PRICE
+    def get(self, date: str):
+        products = Product_detail.query.filter(Product_detail.last_sale_date.contains(date))
+        # products = Product_detail.query.filter(Product_detail.last_sale_date<=date) -- for queries less then or more then !!!
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                '', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
 
 
 
