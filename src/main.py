@@ -82,6 +82,7 @@ def get_paginated_list(results, url, start, limit):
 #####################
 
 
+
 ##### API PRODUCT DETAILS #######
 @api.route('/product-details')
 class AllProductDetails(Resource):
@@ -117,9 +118,11 @@ class ProductDetailsById(Resource):
 
 ##### SLUG #####
 @api.route('/product-details/slug/<string:slug>')
+@api.doc(params={'slug': 'string in a format str+str1+str2'})
 class ProductDetailsBySlug(Resource): 
     
     #### GET PRODUCT DETAILS BY SLUG ####
+    @api.doc(responses={404: 'Slug not found', 200: 'Ok'})
     def get(self, slug: str):
         
         slug_ = list(slug.split("+"))
@@ -224,26 +227,7 @@ class ProductDetailsByReatailPrice(Resource):
                 limit=request.args.get('limit', 20)
             ))
         else: 
-            abort (404) 
-            
-#####  RETAIL PRICE  #####
-# @api.route('/product-details/retail-price/<string:retail_price>')
-# class ProductDetailsByPrice(Resource):
-    
-#     # GET PRODUCT DETAILS BY RETAIL PRICE
-#     def get(self, retail_price: str):
-#         products = Product_detail.query.filter(Product_detail.retail_price==retail_price)        
-        
-#         if products:
-#             products = list(map(lambda x: x.serialize(), products))
-            
-#             return jsonify(get_paginated_list(products, 
-#                 '', 
-#                 start=request.args.get('start', 1), 
-#                 limit=request.args.get('limit', 20)
-#             ))
-#         else: 
-#             abort (400)
+            abort (404)
              
 
 ##### MODEL #####
@@ -293,11 +277,11 @@ class ProductDetailsBySize(Resource):
             abort (400)
             
             
-#####  LAST SALE #####
+#####  LAST SALE PRICE #####
 @api.route('/product-details/last-sale/<int:last_sale>')
 class ProductDetailsByLastSale(Resource):
     
-    # GET PRODUCT DETAILS BY RETAIL PRICE
+    # GET PRODUCT DETAILS BY LAST SALE PRICE
     def get(self, last_sale: int):
         products = Product_detail.query.filter_by(last_sale=last_sale).all()
         # products = Product_detail.query.filter(Product_detail.last_sale<=last_sale) -- for queries less then or more then !!!
