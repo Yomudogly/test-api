@@ -21,10 +21,18 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 blueprint = Blueprint('api', __name__)
 api = Api(blueprint,
-          title='SnkrsDen API',
+          title='SnkrsDen API👟',
           version='v0.2',
-          description='RESTFUL API',
-          default='Available Methods/Endpoints',
+          contact='SnkrsDen',
+          contact_url='https://snkrsden.com',
+          tags=[{'name':'Product Details', 'description': 'all queries on product details'}],
+          contact_email='info@snkrsden.com',
+          description='''RESTFUL API
+          
+            📎 Comments and tips:
+          
+            ✓ For queries by multiple arguments you should pass them separated with + sign''',
+          default='Available Endpoints',
           default_label=None,
           ordered=True)
 app.register_blueprint(blueprint)
@@ -40,7 +48,7 @@ def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 
-### PAGINATION #####
+##### PAGINATION #####
 
 def get_paginated_list(results, url, start, limit):
     start = int(start)
@@ -75,192 +83,179 @@ def get_paginated_list(results, url, start, limit):
 
 
 ##### API PRODUCT DETAILS #######
-
 @api.route('/product-details')
 class AllProductDetails(Resource):
     
     # GET ALL PRODUCT DETAILS
+    @api.doc(responses={404: 'Id not found', 200: 'Ok'})
     def get(self):
         products = Product_detail.query.all()
         products = list(map(lambda x: x.serialize(), products))
         
         return jsonify(get_paginated_list(products,
-            '', 
+            '/product-details', 
             start=request.args.get('start', 1), 
             limit=request.args.get('limit', 20)
         ))
         
 #####  ID  ##### 
 @api.route('/product-details/<int:id>')
+@api.doc(params={'id': 'An ID'})
+# @api.tags(value={'name':'world'})
 class ProductDetailsById(Resource):
     
     # PRODUCT DETAILS BY ID
+    @api.doc(responses={404: 'Id not found', 200: 'Ok'})
     def get(self, id: int):
+        
         products = Product_detail.query.get(id)
         if products:
             return jsonify(products.serialize())
         else: 
-            abort (400, f'Product detail with id {id} does not exist')
-                       
-#####  SLUG  #####           
-@api.route('/product-details/slug/<string:slug>', 
-           '/product-details/slug/<string:slug>+<string:slug_>',
-           '/product-details/slug/<string:slug>+<string:slug_>+<string:slug_1>' )
-class ProductDetailsBySlug(Resource):
+            abort (404, f'Product detail with id {id} does not exist')
+ 
+
+##### SLUG #####
+@api.route('/product-details/slug/<string:slug>')
+class ProductDetailsBySlug(Resource): 
     
-    # GET PRODUCT DETAILS BY SLUG
-    def get(self, slug: str, slug_=None, slug_1=None):
-        products = None
-        if slug_ is None and slug_1 is None:
-            products = Product_detail.query.filter(
-                Product_detail.slug.contains(slug))
-            # products = Product_detail.query.filter(Product_detail.slug.op('regexp')(r'{}'.format(slug))).all()
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products,
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
-        elif slug_1 is None:
-            products = Product_detail.query.filter(
-                Product_detail.slug.contains(slug)).filter(
-                Product_detail.slug.contains(slug_))
-           
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products,
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
+    #### GET PRODUCT DETAILS BY SLUG ####
+    def get(self, slug: str):
+        
+        slug_ = list(slug.split("+"))
+        
+        if len(slug_) is 1:
+            products = Product_detail.query.filter(Product_detail.slug.contains(slug_[0]))
         else:
-            products = Product_detail.query.filter(
-                Product_detail.slug.contains(slug)).filter(
-                Product_detail.slug.contains(slug_)).filter(
-                Product_detail.slug.contains(slug_1))
-           
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products, 
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
+            products = Product_detail.query.filter(Product_detail.slug.contains(slug_[0]))
+            for i in range(1, len(slug_)):
+                products = products.filter(Product_detail.slug.contains(slug_[i]))
             
-#####  COLORWAY  #####           
-@api.route('/product-details/colorway/<string:colorway>', 
-           '/product-details/colorway/<string:colorway>+<string:colorway_>',
-           '/product-details/colorway/<string:colorway>+<string:colorway_>+<string:colorway_1>' )
-class ProductDetailsByColorway(Resource):
-    
-    # GET PRODUCT DETAILS BY COLORWAY
-    def get(self, colorway: str, colorway_=None, colorway_1=None):
-        products = None
-        if colorway_ is None and colorway_1 is None:
-            products = Product_detail.query.filter(
-                Product_detail.colorway.contains(colorway))
-            # products = Product_detail.query.filter(Product_detail.colorway.op('regexp')(r'{}'.format(colorway))).all()
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products,
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
-        elif colorway_1 is None:
-            products = Product_detail.query.filter(
-                Product_detail.colorway.contains(colorway)).filter(
-                Product_detail.colorway.contains(colorway_))
-           
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products,
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
-        else:
-            products = Product_detail.query.filter(
-                Product_detail.colorway.contains(colorway)).filter(
-                Product_detail.colorway.contains(colorway_)).filter(
-                Product_detail.colorway.contains(colorway_1))
-           
-            if products:
-                products = list(map(lambda x: x.serialize(), products))
-                
-                return jsonify(get_paginated_list(products, 
-                    '', 
-                    start=request.args.get('start', 1), 
-                    limit=request.args.get('limit', 20)
-                ))
-            else: 
-                abort (400)
-                
-#####  STYLE  #####
-@api.route('/product-details/style/<string:style>')
-class ProductDetailsByStyle(Resource):
-    
-    # GET PRODUCT DETAILS BY STYLE
-    def get(self, style: str):
-        products = Product_detail.query.filter(Product_detail.style.contains(style))
         if products:
             products = list(map(lambda x: x.serialize(), products))
-            
+                    
             return jsonify(get_paginated_list(products,
-                '', 
+                f'/product-details/slug/{slug}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
         else: 
-            abort (400)
+            abort (404)
+ 
+
+##### COLORWAY #####
+@api.route('/product-details/colorway/<string:colorway>')
+class ProductDetailsByColorway(Resource): 
+    
+    #### GET PRODUCT DETAILS BY COLORWAY ####
+    def get(self, colorway: str):
+        
+        colorway_ = list(colorway.split("+"))
+        
+        if len(colorway_) is 1:
+            products = Product_detail.query.filter(Product_detail.colorway.contains(colorway_[0]))
+        else:
+            products = Product_detail.query.filter(Product_detail.colorway.contains(colorway_[0]))
+            for i in range(1, len(colorway_)):
+                products = products.filter(Product_detail.colorway.contains(colorway_[i]))
+            
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+                    
+            return jsonify(get_paginated_list(products,
+                f'/product-details/colorway/{colorway}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (404)                       
+           
+
+##### STYLE #####
+@api.route('/product-details/style/<string:style>')
+class ProductDetailsByStlye(Resource): 
+    
+    #### GET PRODUCT DETAILS BY STYLE ####
+    def get(self, style: str):
+        
+        style_ = list(style.split("+"))
+        
+        if len(style_) is 1:
+            products = Product_detail.query.filter(Product_detail.style.contains(style_[0]))
+        else:
+            products = Product_detail.query.filter(Product_detail.style.contains(style_[0]))
+            for i in range(1, len(style_)):
+                products = products.filter(Product_detail.style.contains(style_[i]))
+            
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+                    
+            return jsonify(get_paginated_list(products,
+                f'/product-details/style/{style}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (404) 
+            
+            
+##### RETAIL PRICE #####
+@api.route('/product-details/retail-price/<string:retail_price>')
+class ProductDetailsByReatailPrice(Resource): 
+    
+    #### GET PRODUCT DETAILS BY RETAIL PRICE ####
+    def get(self, retail_price: str):
+        
+        retail_price_ = list(retail_price.split("+"))
+        
+        if len(retail_price_) is 1:
+            products = Product_detail.query.filter(Product_detail.retail_price.contains(retail_price_[0]))
+        else:
+            products = Product_detail.query.filter(Product_detail.retail_price.contains(retail_price_[0]))
+            for i in range(1, len(retail_price_)):
+                products = products.filter(Product_detail.retail_price.contains(retail_price_[i]))
+            
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+                    
+            return jsonify(get_paginated_list(products,
+                f'/product-details/retail-price/{retail_price}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (404) 
             
 #####  RETAIL PRICE  #####
-@api.route('/product-details/retail-price/<string:retail_price>')
-class ProductDetailsByPrice(Resource):
+# @api.route('/product-details/retail-price/<string:retail_price>')
+# class ProductDetailsByPrice(Resource):
     
-    # GET PRODUCT DETAILS BY RETAIL PRICE
-    def get(self, retail_price: str):
-        products = Product_detail.query.filter_by(retail_price=retail_price).all()
-        if products:
-            products = list(map(lambda x: x.serialize(), products))
+#     # GET PRODUCT DETAILS BY RETAIL PRICE
+#     def get(self, retail_price: str):
+#         products = Product_detail.query.filter(Product_detail.retail_price==retail_price)        
+        
+#         if products:
+#             products = list(map(lambda x: x.serialize(), products))
             
-            return jsonify(get_paginated_list(products, 
-                '', 
-                start=request.args.get('start', 1), 
-                limit=request.args.get('limit', 20)
-            ))
-        else: 
-            abort (400)
+#             return jsonify(get_paginated_list(products, 
+#                 '', 
+#                 start=request.args.get('start', 1), 
+#                 limit=request.args.get('limit', 20)
+#             ))
+#         else: 
+#             abort (400)
              
 
 ##### MODEL #####
 @api.route('/product-details/model/<string:model>')
 class ProductDetailsByModel(Resource): 
     
-    ### GET PRODUCT DETAILS BY MODELS AS ARGUMENTS  ####
+    ### GET PRODUCT DETAILS BY MODELS  ####
     def get(self, model: str):
         
         model_ = list(model.split("+"))
         
-        if len(model_) is 0:
-            products = None
-        elif len(model_) is 1:
+        if len(model_) is 1:
             products = Product_detail.query.filter(Product_detail.model.contains(model_[0]))
         else:
             products = Product_detail.query.filter(Product_detail.model.contains(model_[0]))
@@ -276,14 +271,14 @@ class ProductDetailsByModel(Resource):
                 limit=request.args.get('limit', 20)
             ))
         else: 
-            abort (400)
+            abort (404)
             
                 
 ##### SIZE #####
 @api.route('/product-details/size/<float:size>')
 class ProductDetailsBySize(Resource):
     
-    # GET PRODUCT DETAILS BY RETAIL PRICE
+    # GET PRODUCT DETAILS BY SIZE
     def get(self, size: float):
         products = Product_detail.query.filter_by(size=size).all()
         if products:
