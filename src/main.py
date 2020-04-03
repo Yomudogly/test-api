@@ -25,14 +25,13 @@ api = Api(blueprint,
           version='v0.2',
           contact='SnkrsDen',
           contact_url='https://snkrsden.com',
-          tags=[{'name':'Product Details', 'description': 'all queries on product details'}],
           contact_email='info@snkrsden.com',
           description='''RESTFUL API
           
             📎 Comments and tips:
           
             ✓ For queries by multiple arguments you should pass them separated with + sign''',
-          default='Available Endpoints',
+          default='uncategorized',
           default_label=None,
           ordered=True)
 app.register_blueprint(blueprint)
@@ -82,26 +81,26 @@ def get_paginated_list(results, url, start, limit):
 #####################
 
 
-
+pd = api.namespace('product-details', description='Operations related to product details table')
 ##### API PRODUCT DETAILS #######
-@api.route('/product-details')
+@pd.route('')
 class AllProductDetails(Resource):
     
     # GET ALL PRODUCT DETAILS
-    @api.doc(responses={404: 'Id not found', 200: 'Ok'})
+    @api.doc(responses={404: 'Product details not found', 200: 'Ok'})
     def get(self):
         products = Product_detail.query.all()
         products = list(map(lambda x: x.serialize(), products))
         
         return jsonify(get_paginated_list(products,
-            '/product-details', 
+            '', 
             start=request.args.get('start', 1), 
             limit=request.args.get('limit', 20)
         ))
         
 #####  ID  ##### 
-@api.route('/product-details/<int:id>')
-@api.doc(params={'id': 'An ID'})
+@pd.route('/<int:id>')
+@api.doc(params={'id': 'id'})
 # @api.tags(value={'name':'world'})
 class ProductDetailsById(Resource):
     
@@ -114,10 +113,31 @@ class ProductDetailsById(Resource):
             return jsonify(products.serialize())
         else: 
             abort (404, f'Product detail with id {id} does not exist')
- 
+
+
+#####  PRODUCT ID  #####
+@pd.route('/product-id/<int:id>')
+@api.doc(params={'id': 'integer'})
+class ProductDetailsByProductId(Resource):
+    
+    # GET PRODUCT DETAILS BY PRODUCT ID
+    @api.doc(responses={404: 'Product id not found', 200: 'Ok'})
+    def get(self, id: int):
+        products = Product_detail.query.filter_by(product_id=id).all()
+        
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                f'/product-id/{id}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
 
 ##### SLUG #####
-@api.route('/product-details/slug/<string:slug>')
+@pd.route('/slug/<string:slug>')
 @api.doc(params={'slug': 'string in a format str+str1+str2'})
 class ProductDetailsBySlug(Resource): 
     
@@ -138,7 +158,7 @@ class ProductDetailsBySlug(Resource):
             products = list(map(lambda x: x.serialize(), products))
                     
             return jsonify(get_paginated_list(products,
-                f'/product-details/slug/{slug}', 
+                f'/slug/{slug}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
@@ -146,29 +166,29 @@ class ProductDetailsBySlug(Resource):
             abort (404)
  
 
-##### COLORWAY #####
-@api.route('/product-details/colorway/<string:colorway>')
-@api.doc(params={'colorway': 'string in a format str+str1+str2'})
-class ProductDetailsByColorway(Resource): 
+##### PRODUCT NAME #####
+@pd.route('/product-name/<string:name>')
+@api.doc(params={'name': 'string in a format str+str1+str2'})
+class ProductDetailsByProductName(Resource): 
     
-    #### GET PRODUCT DETAILS BY COLORWAY ####
-    @api.doc(responses={404: 'Colorway not found', 200: 'Ok'})
-    def get(self, colorway: str):
+    #### GET PRODUCT DETAILS BY PRODUCT NAME ####
+    @api.doc(responses={404: 'Product name not found', 200: 'Ok'})
+    def get(self, name: str):
         
-        colorway_ = list(colorway.split("+"))
+        name_ = list(name.split("+"))
         
-        if len(colorway_) is 1:
-            products = Product_detail.query.filter(Product_detail.colorway.contains(colorway_[0]))
+        if len(name_) is 1:
+            products = Product_detail.query.filter(Product_detail.product_name.contains(name_[0]))
         else:
-            products = Product_detail.query.filter(Product_detail.colorway.contains(colorway_[0]))
-            for i in range(1, len(colorway_)):
-                products = products.filter(Product_detail.colorway.contains(colorway_[i]))
+            products = Product_detail.query.filter(Product_detail.product_name.contains(name_[0]))
+            for i in range(1, len(name_)):
+                products = products.filter(Product_detail.product_name.contains(name_[i]))
             
         if products:
             products = list(map(lambda x: x.serialize(), products))
                     
             return jsonify(get_paginated_list(products,
-                f'/product-details/colorway/{colorway}', 
+                f'/product-name/{name}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
@@ -176,29 +196,29 @@ class ProductDetailsByColorway(Resource):
             abort (404)                       
            
 
-##### STYLE #####
-@api.route('/product-details/style/<string:style>')
-@api.doc(params={'style': 'string in a format str+str1+str2'})
-class ProductDetailsByStlye(Resource): 
+##### BRAND NAME #####
+@pd.route('/brand-name/<string:name>')
+@api.doc(params={'name': 'string in a format str+str1+str2'})
+class ProductDetailsByBrandName(Resource): 
     
-    #### GET PRODUCT DETAILS BY STYLE ####
-    @api.doc(responses={404: 'Style not found', 200: 'Ok'})
-    def get(self, style: str):
+    #### GET PRODUCT DETAILS BY BRAND NAME ####
+    @api.doc(responses={404: 'Brand name not found', 200: 'Ok'})
+    def get(self, name: str):
         
-        style_ = list(style.split("+"))
+        name_ = list(name.split("+"))
         
-        if len(style_) is 1:
-            products = Product_detail.query.filter(Product_detail.style.contains(style_[0]))
+        if len(name_) is 1:
+            products = Product_detail.query.filter(Product_detail.brand_name.contains(name_[0]))
         else:
-            products = Product_detail.query.filter(Product_detail.style.contains(style_[0]))
-            for i in range(1, len(style_)):
-                products = products.filter(Product_detail.style.contains(style_[i]))
+            products = Product_detail.query.filter(Product_detail.brand_name.contains(name_[0]))
+            for i in range(1, len(name_)):
+                products = products.filter(Product_detail.brand_name.contains(name_[i]))
             
         if products:
             products = list(map(lambda x: x.serialize(), products))
                     
             return jsonify(get_paginated_list(products,
-                f'/product-details/style/{style}', 
+                f'/brand-name/{name}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
@@ -206,123 +226,116 @@ class ProductDetailsByStlye(Resource):
             abort (404) 
             
             
-##### RETAIL PRICE #####
-@api.route('/product-details/retail-price/<string:retail_price>')
-@api.doc(params={'retail price': 'string in a format str+str1+str2'})
-class ProductDetailsByReatailPrice(Resource): 
+##### MODEL CATEGORY #####
+@pd.route('/category/<string:category>')
+@api.doc(params={'category': 'string in a format str+str1+str2'})
+class ProductDetailsByModelCategory(Resource): 
     
-    #### GET PRODUCT DETAILS BY RETAIL PRICE ####
-    @api.doc(responses={404: 'Retail price not found', 200: 'Ok'})
-    def get(self, retail_price: str):
+    #### GET PRODUCT DETAILS BY MODEL CATEGORY ####
+    @api.doc(responses={404: 'Model category not found', 200: 'Ok'})
+    def get(self, category: str):
         
-        retail_price_ = list(retail_price.split("+"))
+        category_ = list(category.split("+"))
         
-        if len(retail_price_) is 1:
-            products = Product_detail.query.filter(Product_detail.retail_price.contains(retail_price_[0]))
+        if len(category_) is 1:
+            products = Product_detail.query.filter(Product_detail.model_cat_name.contains(category_[0]))
         else:
-            products = Product_detail.query.filter(Product_detail.retail_price.contains(retail_price_[0]))
-            for i in range(1, len(retail_price_)):
-                products = products.filter(Product_detail.retail_price.contains(retail_price_[i]))
+            products = Product_detail.query.filter(Product_detail.model_cat_name.contains(category_[0]))
+            for i in range(1, len(category_)):
+                products = products.filter(Product_detail.model_cat_name.contains(category_[i]))
             
         if products:
             products = list(map(lambda x: x.serialize(), products))
                     
             return jsonify(get_paginated_list(products,
-                f'/product-details/retail-price/{retail_price}', 
+                f'/category/{category}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
         else: 
             abort (404)
-             
+            
 
-##### MODEL #####
-@api.route('/product-details/model/<string:model>')
-@api.doc(params={'model': 'string in a format str+str1+str2'})
-class ProductDetailsByModel(Resource): 
-    
-    ### GET PRODUCT DETAILS BY MODELS  ####
-    @api.doc(responses={404: 'Model not found', 200: 'Ok'})
-    def get(self, model: str):
-        
-        model_ = list(model.split("+"))
-        
-        if len(model_) is 1:
-            products = Product_detail.query.filter(Product_detail.model.contains(model_[0]))
-        else:
-            products = Product_detail.query.filter(Product_detail.model.contains(model_[0]))
-            for i in range(1, len(model_)):
-                products = products.filter(Product_detail.model.contains(model_[i]))
-            
-        if products:
-            products = list(map(lambda x: x.serialize(), products))
-                    
-            return jsonify(get_paginated_list(products,
-                f'/product-details/model/{model}', 
-                start=request.args.get('start', 1), 
-                limit=request.args.get('limit', 20)
-            ))
-        else: 
-            abort (404)
-            
-                
 ##### SIZE #####
-@api.route('/product-details/size/<float:size>')
+@pd.route('/size/<float:size>')
 @api.doc(params={'size': 'float number in format x.x'})
 class ProductDetailsBySize(Resource):
     
     # GET PRODUCT DETAILS BY SIZE
     @api.doc(responses={404: 'Size not found', 200: 'Ok'})
     def get(self, size: float):
-        products = Product_detail.query.filter_by(size=size).all()
+        products = Product_detail.query.filter_by(sizes_shoes_val=size).all()
         if products:
             products = list(map(lambda x: x.serialize(), products))
             
             return jsonify(get_paginated_list(products, 
-                '', 
+                f'/size/{size}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+             
+
+#####  LOWEST ASK PRICE #####
+@pd.route('/lowest-ask/<float:ask>')
+@api.doc(params={'ask': 'float in format x.xx'})
+class ProductDetailsByLowestAsk(Resource):
+    
+    # GET PRODUCT DETAILS BY LOWEST ASK PRICE
+    @api.doc(responses={404: 'Lowest asking price not found', 200: 'Ok'})
+    def get(self, ask: float):
+        products = Product_detail.query.filter_by(lowest_ask=ask).all()
+        # products = Product_detail.query.filter(Product_detail.lowest_ask<=ask) -- for queries less then or more then !!!
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                f'/lowest-ask/{ask}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
         else: 
             abort (400)
             
+        
+#####  HIGHEST OFFER  #####
+@pd.route('/high-offer/<float:offer>')
+@api.doc(params={'offer': 'float in format x.xx'})
+class ProductDetailsByHighestOffer(Resource):
+    
+    # GET PRODUCT DETAILS BY HIGHEST OFFER
+    @api.doc(responses={404: 'Highest offer not found', 200: 'Ok'})
+    def get(self, offer: float):
+        products = Product_detail.query.filter_by(highest_offer=offer).all()
+        # products = Product_detail.query.filter(Product_detail.highest_offer<=offer) -- for queries less then or more then !!!
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
             
+            return jsonify(get_paginated_list(products, 
+                f'/high-offer/{offer}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+ 
+                         
 #####  LAST SALE PRICE #####
-@api.route('/product-details/last-sale/<int:last_sale>')
-@api.doc(params={'last sale price': 'integer'})
+@pd.route('/last-sale/<float:last_sale>')
+@api.doc(params={'last_sale': 'float in format x.xx'})
 class ProductDetailsByLastSale(Resource):
     
     # GET PRODUCT DETAILS BY LAST SALE PRICE
     @api.doc(responses={404: 'Last sale price not found', 200: 'Ok'})
-    def get(self, last_sale: int):
+    def get(self, last_sale: float):
         products = Product_detail.query.filter_by(last_sale=last_sale).all()
         # products = Product_detail.query.filter(Product_detail.last_sale<=last_sale) -- for queries less then or more then !!!
         if products:
             products = list(map(lambda x: x.serialize(), products))
             
             return jsonify(get_paginated_list(products, 
-                '', 
-                start=request.args.get('start', 1), 
-                limit=request.args.get('limit', 20)
-            ))
-        else: 
-            abort (400)
-
-#####  RELEASE DATE #####
-@api.route('/product-details/release-date/<string:release>')
-@api.doc(params={'release date': 'string in a format YYYY-MM-DD'})
-class ProductDetailsByReleaseDate(Resource):
-    # release should be a string in format "YYYY-MM-DD" to represent full date !!!
-    # GET PRODUCT DETAILS BY RETAIL PRICE
-    @api.doc(responses={404: 'Release date not found', 200: 'Ok'})
-    def get(self, release: str):
-        products = Product_detail.query.filter(Product_detail.release_date.contains(release))
-        # products = Product_detail.query.filter(Product_detail.release_date<=release) -- for queries less then or more then !!!
-        if products:
-            products = list(map(lambda x: x.serialize(), products))
-            
-            return jsonify(get_paginated_list(products, 
-                '', 
+                f'/last-sale/{last_sale}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
@@ -330,8 +343,8 @@ class ProductDetailsByReleaseDate(Resource):
             abort (400)
             
 #####  LAST SALE DATE #####
-@api.route('/product-details/last-sale-date/<string:date>')
-@api.doc(params={'last sale date': 'string in a format YYYY-MM-DD'})
+@pd.route('/last-sale-date/<string:date>')
+@api.doc(params={'date': 'string in a format YYYY-MM-DD'})
 class ProductDetailsByReleaseDate(Resource):
     # date should be a string in format "YYYY-MM-DD" to represent full date !!!
     # GET PRODUCT DETAILS BY RETAIL PRICE
@@ -343,7 +356,29 @@ class ProductDetailsByReleaseDate(Resource):
             products = list(map(lambda x: x.serialize(), products))
             
             return jsonify(get_paginated_list(products, 
-                '', 
+                f'/last-sale-date/{date}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else: 
+            abort (400)
+            
+            
+#####  SALES #####
+@pd.route('/sales/<int:sales>')
+@api.doc(params={'sales': 'integer'})
+class ProductDetailsBySales(Resource):
+    
+    # GET PRODUCT DETAILS BY SALES
+    @api.doc(responses={404: 'Sales not found', 200: 'Ok'})
+    def get(self, sales: int):
+        products = Product_detail.query.filter_by(sales=sales).all()
+        # products = Product_detail.query.filter(Product_detail.sales<=sales) -- for queries less then or more then !!!
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+            
+            return jsonify(get_paginated_list(products, 
+                f'/sales/{sales}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
@@ -351,13 +386,17 @@ class ProductDetailsByReleaseDate(Resource):
             abort (400)
 
 
-
+#######################################################
+#######################################################
+########################################################
 ### API SIZES ###
 
-@api.route('/sizes')
+sz = api.namespace('sizes', description='Operations related to sizes table')
+@sz.route('')
 class AllSizes(Resource):
     
     # GET ALL SIZES
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self):
         sizes = Sizes_shoes.query.all()
         sizes = list(map(lambda x: x.serialize(), sizes))
@@ -368,10 +407,12 @@ class AllSizes(Resource):
     ))
 
 
-@api.route('/sizes/<int:id>')
+@sz.route('/<int:id>')
+@api.doc(params={'id': 'integer'})
 class SizesById(Resource):
     
     # SIZES BY ID
+    @api.doc(responses={404: 'Size not found', 200: 'Ok'})
     def get(self, id: int):
         size = Sizes_shoes.query.get(id)
         if size:
@@ -380,10 +421,12 @@ class SizesById(Resource):
             abort (404, f'Size with id {id} does not exist')
             
 
-@api.route('/sizes/brand-id/<int:brand_id>')
+@sz.route('/brand-id/<int:brand_id>')
+@api.doc(params={'brand_id': 'integer'})
 class SizesByBrandId(Resource):
     
     # GET SIZES BY BRAND ID
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, brand_id: int):
         sizes = Sizes_shoes.query.filter_by(brand_id=brand_id).all()
         if sizes:
@@ -393,10 +436,12 @@ class SizesByBrandId(Resource):
             abort (404, f'Sizes with brand id {brand_id} do not exist')
             
 
-@api.route('/sizes/type-id/<string:sizes_types_id>')
+@sz.route('/type-id/<string:sizes_types_id>')
+@api.doc(params={'sizes_types_id': 'string - m, w, td, gs, y or kids'})
 class SizesByTypeId(Resource):
     
     # GET SIZES BY TYPE ID
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, sizes_types_id: str):
         sizes = Sizes_shoes.query.filter_by(sizes_types_id=sizes_types_id).all()
         if sizes:
@@ -406,10 +451,12 @@ class SizesByTypeId(Resource):
             abort (404, f'Sizes with type id {sizes_types_id} do not exist')
   
  
-@api.route('/sizes/us/<string:us>')
+@sz.route('/us/<string:us>')
+@api.doc(params={'us': 'string in format number+letter or number+dot+number'})
 class SizesByUS(Resource):
     
     # GET SIZES BY US
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, us: str):
         sizes = Sizes_shoes.query.filter_by(us=us).all()
         if sizes:
@@ -419,10 +466,12 @@ class SizesByUS(Resource):
             abort (404, f'Sizes with us {us} do not exist')
         
 
-@api.route('/sizes/uk/<string:uk>')
+@sz.route('/uk/<string:uk>')
+@api.doc(params={'uk': 'string in format number+dot+number'})
 class SizesByUK(Resource):
     
     # GET SIZES BY UK
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, uk: str):
         sizes = Sizes_shoes.query.filter_by(uk=uk).all()
         if sizes:
@@ -433,10 +482,12 @@ class SizesByUK(Resource):
     
 
 
-@api.route('/sizes/cm/<float:cm>')
+@sz.route('/cm/<float:cm>')
+@api.doc(params={'cm': 'float'})
 class SizesByCM(Resource):
     
     # GET SIZES BY CM --  RQUIRES FLOAT NUMBER AS A PARAMETER
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, cm: float):
         sizes = Sizes_shoes.query.filter_by(cm=cm).all()
         if sizes:
@@ -446,10 +497,12 @@ class SizesByCM(Resource):
             abort (404, f'Sizes with cm {cm} do not exist')
             
             
-@api.route('/sizes/europe/<float:europe>')
+@sz.route('/europe/<float:europe>')
+@api.doc(params={'europe': 'float'})
 class SizesByEurope(Resource):
     
     # GET SIZES BY EUROPE --  RQUIRES FLOAT NUMBER AS A PARAMETER
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, europe: float):
         sizes = Sizes_shoes.query.filter_by(europe=europe).all()
         if sizes:
@@ -459,10 +512,12 @@ class SizesByEurope(Resource):
             abort (404, f'Sizes with europe size {europe} do not exist')
             
             
-@api.route('/sizes/inch/<float:inch>')
+@sz.route('/inch/<float:inch>')
+@api.doc(params={'inch': 'float'})
 class SizesByInch(Resource):
     
     # GET SIZES BY INCH --  RQUIRES FLOAT NUMBER AS A PARAMETER
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, inch: float):
         sizes = Sizes_shoes.query.filter_by(inch=inch).all()
         if sizes:
@@ -472,10 +527,12 @@ class SizesByInch(Resource):
             abort (404, f'Sizes with inch {inch} do not exist')
             
             
-@api.route('/sizes/woman/<float:woman>')
+@sz.route('/woman/<float:woman>')
+@api.doc(params={'woman': 'float'})
 class SizesByWoman(Resource):
     
     # GET SIZES BY WOMAN --  RQUIRES FLOAT NUMBER AS A PARAMETER
+    @api.doc(responses={404: 'Sizes not found', 200: 'Ok'})
     def get(self, woman: float):
         sizes = Sizes_shoes.query.filter_by(woman=woman).all()
         if sizes:
