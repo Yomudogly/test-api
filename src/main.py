@@ -148,9 +148,11 @@ class ProductDetailsBySlug(Resource):
 
 ##### COLORWAY #####
 @api.route('/product-details/colorway/<string:colorway>')
+@api.doc(params={'colorway': 'string in a format str+str1+str2'})
 class ProductDetailsByColorway(Resource): 
     
     #### GET PRODUCT DETAILS BY COLORWAY ####
+    @api.doc(responses={404: 'Colorway not found', 200: 'Ok'})
     def get(self, colorway: str):
         
         colorway_ = list(colorway.split("+"))
@@ -176,9 +178,11 @@ class ProductDetailsByColorway(Resource):
 
 ##### STYLE #####
 @api.route('/product-details/style/<string:style>')
+@api.doc(params={'style': 'string in a format str+str1+str2'})
 class ProductDetailsByStlye(Resource): 
     
     #### GET PRODUCT DETAILS BY STYLE ####
+    @api.doc(responses={404: 'Style not found', 200: 'Ok'})
     def get(self, style: str):
         
         style_ = list(style.split("+"))
@@ -204,9 +208,11 @@ class ProductDetailsByStlye(Resource):
             
 ##### RETAIL PRICE #####
 @api.route('/product-details/retail-price/<string:retail_price>')
+@api.doc(params={'retail price': 'string in a format str+str1+str2'})
 class ProductDetailsByReatailPrice(Resource): 
     
     #### GET PRODUCT DETAILS BY RETAIL PRICE ####
+    @api.doc(responses={404: 'Retail price not found', 200: 'Ok'})
     def get(self, retail_price: str):
         
         retail_price_ = list(retail_price.split("+"))
@@ -232,9 +238,11 @@ class ProductDetailsByReatailPrice(Resource):
 
 ##### MODEL #####
 @api.route('/product-details/model/<string:model>')
+@api.doc(params={'model': 'string in a format str+str1+str2'})
 class ProductDetailsByModel(Resource): 
     
     ### GET PRODUCT DETAILS BY MODELS  ####
+    @api.doc(responses={404: 'Model not found', 200: 'Ok'})
     def get(self, model: str):
         
         model_ = list(model.split("+"))
@@ -260,9 +268,11 @@ class ProductDetailsByModel(Resource):
                 
 ##### SIZE #####
 @api.route('/product-details/size/<float:size>')
+@api.doc(params={'size': 'float number in format x.x'})
 class ProductDetailsBySize(Resource):
     
     # GET PRODUCT DETAILS BY SIZE
+    @api.doc(responses={404: 'Size not found', 200: 'Ok'})
     def get(self, size: float):
         products = Product_detail.query.filter_by(size=size).all()
         if products:
@@ -279,9 +289,11 @@ class ProductDetailsBySize(Resource):
             
 #####  LAST SALE PRICE #####
 @api.route('/product-details/last-sale/<int:last_sale>')
+@api.doc(params={'last sale price': 'integer'})
 class ProductDetailsByLastSale(Resource):
     
     # GET PRODUCT DETAILS BY LAST SALE PRICE
+    @api.doc(responses={404: 'Last sale price not found', 200: 'Ok'})
     def get(self, last_sale: int):
         products = Product_detail.query.filter_by(last_sale=last_sale).all()
         # products = Product_detail.query.filter(Product_detail.last_sale<=last_sale) -- for queries less then or more then !!!
@@ -298,9 +310,11 @@ class ProductDetailsByLastSale(Resource):
 
 #####  RELEASE DATE #####
 @api.route('/product-details/release-date/<string:release>')
+@api.doc(params={'release date': 'string in a format YYYY-MM-DD'})
 class ProductDetailsByReleaseDate(Resource):
     # release should be a string in format "YYYY-MM-DD" to represent full date !!!
     # GET PRODUCT DETAILS BY RETAIL PRICE
+    @api.doc(responses={404: 'Release date not found', 200: 'Ok'})
     def get(self, release: str):
         products = Product_detail.query.filter(Product_detail.release_date.contains(release))
         # products = Product_detail.query.filter(Product_detail.release_date<=release) -- for queries less then or more then !!!
@@ -317,9 +331,11 @@ class ProductDetailsByReleaseDate(Resource):
             
 #####  LAST SALE DATE #####
 @api.route('/product-details/last-sale-date/<string:date>')
+@api.doc(params={'last sale date': 'string in a format YYYY-MM-DD'})
 class ProductDetailsByReleaseDate(Resource):
     # date should be a string in format "YYYY-MM-DD" to represent full date !!!
     # GET PRODUCT DETAILS BY RETAIL PRICE
+    @api.doc(responses={404: 'Last sale date not found', 200: 'Ok'})
     def get(self, date: str):
         products = Product_detail.query.filter(Product_detail.last_sale_date.contains(date))
         # products = Product_detail.query.filter(Product_detail.last_sale_date<=date) -- for queries less then or more then !!!
