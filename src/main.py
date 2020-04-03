@@ -135,125 +135,27 @@ class ProductDetailsByProductId(Resource):
             ))
         else: 
             abort (400)
-
-##### SLUG #####
-@pd.route('/slug/<string:slug>')
-@api.doc(params={'slug': 'string in a format str+str1+str2'})
-class ProductDetailsBySlug(Resource): 
-    
-    #### GET PRODUCT DETAILS BY SLUG ####
-    @api.doc(responses={404: 'Slug not found', 200: 'Ok'})
-    def get(self, slug: str):
-        
-        slug_ = list(slug.split("+"))
-        
-        if len(slug_) is 1:
-            products = Product_detail.query.filter(Product_detail.slug.contains(slug_[0]))
-        else:
-            products = Product_detail.query.filter(Product_detail.slug.contains(slug_[0]))
-            for i in range(1, len(slug_)):
-                products = products.filter(Product_detail.slug.contains(slug_[i]))
             
+#####  SIZES SHOES ID  #####
+@pd.route('/sizes-id/<int:id>')
+@api.doc(params={'id': 'integer'})
+class ProductDetailsBySizesShoes(Resource):
+    
+    # GET PRODUCT DETAILS BY PRODUCT ID
+    @api.doc(responses={404: 'Sizes shoes id not found', 200: 'Ok'})
+    def get(self, id: int):
+        products = Product_detail.query.filter_by(sizes_shoes_id=id).all()
+        
         if products:
             products = list(map(lambda x: x.serialize(), products))
-                    
-            return jsonify(get_paginated_list(products,
-                f'/slug/{slug}', 
+            
+            return jsonify(get_paginated_list(products, 
+                f'/sizes-id/{id}', 
                 start=request.args.get('start', 1), 
                 limit=request.args.get('limit', 20)
             ))
         else: 
-            abort (404)
- 
-
-##### PRODUCT NAME #####
-@pd.route('/product-name/<string:name>')
-@api.doc(params={'name': 'string in a format str+str1+str2'})
-class ProductDetailsByProductName(Resource): 
-    
-    #### GET PRODUCT DETAILS BY PRODUCT NAME ####
-    @api.doc(responses={404: 'Product name not found', 200: 'Ok'})
-    def get(self, name: str):
-        
-        name_ = list(name.split("+"))
-        
-        if len(name_) is 1:
-            products = Product_detail.query.filter(Product_detail.product_name.contains(name_[0]))
-        else:
-            products = Product_detail.query.filter(Product_detail.product_name.contains(name_[0]))
-            for i in range(1, len(name_)):
-                products = products.filter(Product_detail.product_name.contains(name_[i]))
-            
-        if products:
-            products = list(map(lambda x: x.serialize(), products))
-                    
-            return jsonify(get_paginated_list(products,
-                f'/product-name/{name}', 
-                start=request.args.get('start', 1), 
-                limit=request.args.get('limit', 20)
-            ))
-        else: 
-            abort (404)                       
-           
-
-##### BRAND NAME #####
-@pd.route('/brand-name/<string:name>')
-@api.doc(params={'name': 'string in a format str+str1+str2'})
-class ProductDetailsByBrandName(Resource): 
-    
-    #### GET PRODUCT DETAILS BY BRAND NAME ####
-    @api.doc(responses={404: 'Brand name not found', 200: 'Ok'})
-    def get(self, name: str):
-        
-        name_ = list(name.split("+"))
-        
-        if len(name_) is 1:
-            products = Product_detail.query.filter(Product_detail.brand_name.contains(name_[0]))
-        else:
-            products = Product_detail.query.filter(Product_detail.brand_name.contains(name_[0]))
-            for i in range(1, len(name_)):
-                products = products.filter(Product_detail.brand_name.contains(name_[i]))
-            
-        if products:
-            products = list(map(lambda x: x.serialize(), products))
-                    
-            return jsonify(get_paginated_list(products,
-                f'/brand-name/{name}', 
-                start=request.args.get('start', 1), 
-                limit=request.args.get('limit', 20)
-            ))
-        else: 
-            abort (404) 
-            
-            
-##### MODEL CATEGORY #####
-@pd.route('/category/<string:category>')
-@api.doc(params={'category': 'string in a format str+str1+str2'})
-class ProductDetailsByModelCategory(Resource): 
-    
-    #### GET PRODUCT DETAILS BY MODEL CATEGORY ####
-    @api.doc(responses={404: 'Model category not found', 200: 'Ok'})
-    def get(self, category: str):
-        
-        category_ = list(category.split("+"))
-        
-        if len(category_) is 1:
-            products = Product_detail.query.filter(Product_detail.model_cat_name.contains(category_[0]))
-        else:
-            products = Product_detail.query.filter(Product_detail.model_cat_name.contains(category_[0]))
-            for i in range(1, len(category_)):
-                products = products.filter(Product_detail.model_cat_name.contains(category_[i]))
-            
-        if products:
-            products = list(map(lambda x: x.serialize(), products))
-                    
-            return jsonify(get_paginated_list(products,
-                f'/category/{category}', 
-                start=request.args.get('start', 1), 
-                limit=request.args.get('limit', 20)
-            ))
-        else: 
-            abort (404)
+            abort (400)
             
 
 ##### SIZE #####
@@ -540,6 +442,132 @@ class SizesByWoman(Resource):
             return jsonify(sizes)
         else: 
             abort (404, f'Sizes with woman size {woman} do not exist')
+
+
+################ NEED TO CHECK ########################
+
+
+# ##### SLUG #####
+# @pd.route('/slug/<string:slug>')
+# @api.doc(params={'slug': 'string in a format str+str1+str2'})
+# class ProductDetailsBySlug(Resource): 
+    
+#     #### GET PRODUCT DETAILS BY SLUG ####
+#     @api.doc(responses={404: 'Slug not found', 200: 'Ok'})
+#     def get(self, slug: str):
+        
+#         slug_ = list(slug.split("+"))
+        
+#         if len(slug_) is 1:
+#             products = Product_detail.query.filter(Product_detail.slug.contains(slug_[0]))
+#         else:
+#             products = Product_detail.query.filter(Product_detail.slug.contains(slug_[0]))
+#             for i in range(1, len(slug_)):
+#                 products = products.filter(Product_detail.slug.contains(slug_[i]))
+            
+#         if products:
+#             products = list(map(lambda x: x.serialize(), products))
+                    
+#             return jsonify(get_paginated_list(products,
+#                 f'/slug/{slug}', 
+#                 start=request.args.get('start', 1), 
+#                 limit=request.args.get('limit', 20)
+#             ))
+#         else: 
+#             abort (404)
+ 
+
+# ##### PRODUCT NAME #####
+# @pd.route('/product-name/<string:name>')
+# @api.doc(params={'name': 'string in a format str+str1+str2'})
+# class ProductDetailsByProductName(Resource): 
+    
+#     #### GET PRODUCT DETAILS BY PRODUCT NAME ####
+#     @api.doc(responses={404: 'Product name not found', 200: 'Ok'})
+#     def get(self, name: str):
+        
+#         name_ = list(name.split("+"))
+        
+#         if len(name_) is 1:
+#             products = Product_detail.query.filter(Product_detail.product_name.contains(name_[0]))
+#         else:
+#             products = Product_detail.query.filter(Product_detail.product_name.contains(name_[0]))
+#             for i in range(1, len(name_)):
+#                 products = products.filter(Product_detail.product_name.contains(name_[i]))
+            
+#         if products:
+#             products = list(map(lambda x: x.serialize(), products))
+                    
+#             return jsonify(get_paginated_list(products,
+#                 f'/product-name/{name}', 
+#                 start=request.args.get('start', 1), 
+#                 limit=request.args.get('limit', 20)
+#             ))
+#         else: 
+#             abort (404)                       
+           
+
+# ##### BRAND NAME #####
+# @pd.route('/brand-name/<string:name>')
+# @api.doc(params={'name': 'string in a format str+str1+str2'})
+# class ProductDetailsByBrandName(Resource): 
+    
+#     #### GET PRODUCT DETAILS BY BRAND NAME ####
+#     @api.doc(responses={404: 'Brand name not found', 200: 'Ok'})
+#     def get(self, name: str):
+        
+#         name_ = list(name.split("+"))
+        
+#         if len(name_) is 1:
+#             products = Product_detail.query.filter(Product_detail.brand_name.contains(name_[0]))
+#         else:
+#             products = Product_detail.query.filter(Product_detail.brand_name.contains(name_[0]))
+#             for i in range(1, len(name_)):
+#                 products = products.filter(Product_detail.brand_name.contains(name_[i]))
+            
+#         if products:
+#             products = list(map(lambda x: x.serialize(), products))
+                    
+#             return jsonify(get_paginated_list(products,
+#                 f'/brand-name/{name}', 
+#                 start=request.args.get('start', 1), 
+#                 limit=request.args.get('limit', 20)
+#             ))
+#         else: 
+#             abort (404) 
+            
+            
+# ##### MODEL CATEGORY #####
+# @pd.route('/category/<string:category>')
+# @api.doc(params={'category': 'string in a format str+str1+str2'})
+# class ProductDetailsByModelCategory(Resource): 
+    
+#     #### GET PRODUCT DETAILS BY MODEL CATEGORY ####
+#     @api.doc(responses={404: 'Model category not found', 200: 'Ok'})
+#     def get(self, category: str):
+        
+#         category_ = list(category.split("+"))
+        
+#         if len(category_) is 1:
+#             products = Product_detail.query.filter(Product_detail.model_cat_name.contains(category_[0]))
+#         else:
+#             products = Product_detail.query.filter(Product_detail.model_cat_name.contains(category_[0]))
+#             for i in range(1, len(category_)):
+#                 products = products.filter(Product_detail.model_cat_name.contains(category_[i]))
+            
+#         if products:
+#             products = list(map(lambda x: x.serialize(), products))
+                    
+#             return jsonify(get_paginated_list(products,
+#                 f'/category/{category}', 
+#                 start=request.args.get('start', 1), 
+#                 limit=request.args.get('limit', 20)
+#             ))
+#         else: 
+#             abort (404)
+
+
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

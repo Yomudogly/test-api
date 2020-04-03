@@ -20,6 +20,8 @@ class Sizes_shoes(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
     
+    product_details = db.relationship('Product_detail', backref='sizes_shoes', lazy=True)
+    
     
     def __repr__(self):
         return (f'Size {self.cm}')
@@ -46,10 +48,7 @@ class Sizes_shoes(db.Model):
 class Product_detail(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     product_id = db.Column(db.Integer)  #ForeignKey('product.id') !!!
-    slug = db.Column(db.Unicode(100), nullable=True)
-    product_name = db.Column(db.Unicode(200), nullable=True)
-    brand_name = db.Column(db.Unicode(50), nullable=True)
-    model_cat_name = db.Column(db.Unicode(200), nullable=True)
+    sizes_shoes_id = db.Column(db.Integer, ForeignKey('sizes_shoes.id'))
     sizes_shoes_val = db.Column(db.Float(18,1), nullable=True)
     lowest_ask = db.Column(db.Float(18,2), nullable=True)
     highest_offer = db.Column(db.Float(18,2), nullable=True)
@@ -66,10 +65,7 @@ class Product_detail(db.Model):
         return {
             "id": self.id,
             "productId": self.product_id,
-            "slug": self.slug,
-            "productName": self.product_name,
-            "brandName": self.brand_name, 
-            "modelCatName": self.model_cat_name,
+            "sizesShoesId": self.sizes_shoes_id,
             "sizesShoesVal": self.sizes_shoes_val,
             "lowestAsk": self.lowest_ask,
             "highestOffer": self.highest_offer,
@@ -77,17 +73,3 @@ class Product_detail(db.Model):
             "lastSaleDate": self.last_sale_date,
             "sales": self.sales
         }
-    
-# class Person(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(80), unique=True, nullable=False)
-#     email = db.Column(db.String(120), unique=True, nullable=False)
-
-#     def __repr__(self):
-#         return '<Person %r>' % self.username
-
-#     def serialize(self):
-#         return {
-#             "username": self.username,
-#             "email": self.email
-#         }
