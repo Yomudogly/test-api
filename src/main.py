@@ -291,6 +291,8 @@ class ProductDetailsBySales(Resource):
 #######################################################
 #######################################################
 ########################################################
+
+
 ### API SIZES ###
 
 sz = api.namespace('sizes', description='Operations related to sizes table')
@@ -333,7 +335,11 @@ class SizesByBrandId(Resource):
         sizes = Sizes_shoes.query.filter_by(brand_id=brand_id).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/brand-id/{brand_id}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with brand id {brand_id} do not exist')
             
@@ -348,7 +354,11 @@ class SizesByTypeId(Resource):
         sizes = Sizes_shoes.query.filter_by(sizes_types_id=sizes_types_id).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/type-id/{sizes_types_id}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with type id {sizes_types_id} do not exist')
   
@@ -363,7 +373,11 @@ class SizesByUS(Resource):
         sizes = Sizes_shoes.query.filter_by(us=us).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/us/{us}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with us {us} do not exist')
         
@@ -378,7 +392,11 @@ class SizesByUK(Resource):
         sizes = Sizes_shoes.query.filter_by(uk=uk).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/uk/{uk}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with uk {uk} do not exist')
     
@@ -394,7 +412,11 @@ class SizesByCM(Resource):
         sizes = Sizes_shoes.query.filter_by(cm=cm).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/cm/{cm}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with cm {cm} do not exist')
             
@@ -409,7 +431,11 @@ class SizesByEurope(Resource):
         sizes = Sizes_shoes.query.filter_by(europe=europe).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/europe/{europe}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with europe size {europe} do not exist')
             
@@ -424,7 +450,11 @@ class SizesByInch(Resource):
         sizes = Sizes_shoes.query.filter_by(inch=inch).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/inch/{inch}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with inch {inch} do not exist')
             
@@ -439,7 +469,11 @@ class SizesByWoman(Resource):
         sizes = Sizes_shoes.query.filter_by(woman=woman).all()
         if sizes:
             sizes = list(map(lambda x: x.serialize(), sizes))
-            return jsonify(sizes)
+            return jsonify(get_paginated_list(sizes, 
+                f'/woman/{woman}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
         else: 
             abort (404, f'Sizes with woman size {woman} do not exist')
 
