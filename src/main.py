@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
-from models import db, Sizes_shoes, Product_detail
+from models import db, Sizes_shoes, Product_detail, Product
 # import re
 # from alembic import op
 # from sqlalchemy import func
@@ -476,6 +476,30 @@ class SizesByWoman(Resource):
             ))
         else: 
             abort (404, f'Sizes with woman size {woman} do not exist')
+
+
+
+#######################################################
+#######################################################
+########################################################
+
+
+### API PRODUCT ###
+
+pr = api.namespace('products', description='Operations related to product table')
+@pr.route('')
+class AllProducts(Resource):
+    
+    # GET ALL SIZES
+    @api.doc(responses={404: 'Products not found', 200: 'Ok'})
+    def get(self):
+        products = Product.query.all()
+        products = list(map(lambda x: x.serialize(), products))
+        
+        return jsonify(get_paginated_list(products, '/products', 
+            start=request.args.get('start', 1), 
+            limit=request.args.get('limit', 20)
+    ))
 
 
 ################ NEED TO CHECK ########################
