@@ -7,7 +7,7 @@ db = SQLAlchemy()
 
 class Sizes_shoes(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    brand_id = db.Column(db.Integer, nullable=True)
+    brand_id = db.Column(db.Integer, ForeignKey('brand.id'))
     sizes_types_id = db.Column(db.Unicode(10))
     cm = db.Column(db.Float(5,1))
     us = db.Column(db.Unicode(20))
@@ -79,7 +79,7 @@ class Product_detail(db.Model):
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     name = db.Column(db.Unicode(100))
-    brand_id = db.Column(db.Integer, nullable=True)  #ForeignKey('brand.id')
+    brand_id = db.Column(db.Integer, ForeignKey('brand.id'))
     brand_name = db.Column(db.Unicode(50), nullable=True) # DUPLICAT of Brand row
     model_cat_id = db.Column(db.Integer, nullable=True)  #ForeignKey('model_cat.id')
     model_cat_name = db.Column(db.Unicode(200), nullable=True) # DUPLICAT of Model_cat row
@@ -99,11 +99,11 @@ class Product(db.Model):
     seo_title = db.Column(db.Unicode(60), nullable=True)
     seo_description = db.Column(db.Unicode(160), nullable=True)
     seo_keywords = db.Column(LONGTEXT, nullable=True)
-    lowest_ask = db.Column(db.Float(18,2), nullable=True) # DUPLICATE of Product_detail row
-    highest_offer = db.Column(db.Float(18,2), nullable=True) # DUPLICATE of Product_detail row
+    lowest_ask = db.Column(db.Float(18,2), nullable=True) 
+    highest_offer = db.Column(db.Float(18,2), nullable=True)
     most_recent = db.Column(db.Float(18,2), nullable=True) 
     image = db.Column(db.Unicode(100), nullable=True)
-    recently_viewed = db.Column(db.DateTime, nullable=True)  # DUPLICAT of recent_view ???
+    recently_viewed = db.Column(db.DateTime, nullable=True)  # WILL KEEP INSTEAD OF recent_view
     user_id = db.Column(db.Integer, nullable=True)   # ForeignKey('sf_guard_user.id')
     user_name = db.Column(db.Unicode(100), nullable=True) # DUPLICAT of sf_guard_user row ???
     created_at = db.Column(db.DateTime)
@@ -111,6 +111,7 @@ class Product(db.Model):
     slug = db.Column(db.Unicode(255), nullable=True)
     
     product_details = db.relationship('Product_detail', backref='product', lazy=True)
+    
     
     def __repr__(self):
         return (f'Product {self.name}')
@@ -146,6 +147,53 @@ class Product(db.Model):
             "recentlyViewed": self.recently_viewed,
             "userId": self.user_id,
             "userName": self.user_name,
+            "createdAt": self.created_at,
+            "updatedAt": self.updated_at,
+            "slug": self.slug 
+        }
+        
+        
+class Brand(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    brand_id =  db.Column(db.Integer, default=0, nullable=True)  # WHY ???
+    name = db.Column(db.Unicode(100))
+    description = db.Column(LONGTEXT, nullable=True)  #  ??? OR DUPLICAT OF PRODUCT ROW  
+    seo_title = db.Column(db.Unicode(60), nullable=True)   # DUPLICAT OF PRODUCT ROW
+    seo_description = db.Column(db.Unicode(160), nullable=True)  # DUPLICAT OF PRODUCT ROW
+    seo_keywords = db.Column(LONGTEXT, nullable=True)  # DUPLICAT OF PRODUCT ROW
+    shortcut =  db.Column(db.Unicode(200), nullable=True)
+    image = db.Column(db.Unicode(100), nullable=True)
+    favicon = db.Column(db.Unicode(100), nullable=True)
+    user_id = db.Column(db.Integer)      # ForeignKey('sf_guard_user.id')
+    status = db.Column(db.Integer, default=0, nullable=True)
+    rep_popular_brand = db.Column(db.Integer, default=0, nullable=True)
+    posicion_order = db.Column(db.Integer, default=0, nullable=True)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+    slug = db.Column(db.Unicode(255), nullable=True)
+    
+    product = db.relationship('Product', backref='brand', lazy=True)
+    sizes_shoes = db.relationship('Sizes_shoes', backref='brand', lazy=True)
+    
+    def __repr__(self):
+        return (f'Brand {self.name}')
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "brandId": self.brand_id,
+            "name": self.name,
+            "description": self.description,
+            "seoTitle": self.seo_title,
+            "seoDesc": self.seo_description,
+            "seoKeywords": self.seo_keywords,
+            "shortcut": self.shortcut,
+            "image": self.image,
+            "favicon": self.favicon,
+            "userId": self.user_id,
+            "status": self.status,
+            "repPopularBrand": self.rep_popular_brand,
+            "positionOrder": self.posicion_order,
             "createdAt": self.created_at,
             "updatedAt": self.updated_at,
             "slug": self.slug 

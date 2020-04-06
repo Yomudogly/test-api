@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
-from models import db, Sizes_shoes, Product_detail, Product
+from models import db, Sizes_shoes, Product_detail, Product, Brand
 # import re
 # from alembic import op
 # from sqlalchemy import func
@@ -32,7 +32,6 @@ api = Api(blueprint,
           
             ✓ For queries by multiple arguments you should pass them separated with + sign''',
           default='uncategorized',
-          default_label=None,
           ordered=True)
 app.register_blueprint(blueprint)
 
@@ -490,13 +489,38 @@ pr = api.namespace('products', description='Operations related to product table'
 @pr.route('')
 class AllProducts(Resource):
     
-    # GET ALL SIZES
+    # GET ALL PRODUCTS
     @api.doc(responses={404: 'Products not found', 200: 'Ok'})
     def get(self):
         products = Product.query.all()
         products = list(map(lambda x: x.serialize(), products))
         
         return jsonify(get_paginated_list(products, '/products', 
+            start=request.args.get('start', 1), 
+            limit=request.args.get('limit', 20)
+    ))
+        
+        
+        
+        
+#######################################################
+#######################################################
+########################################################
+
+
+### API BRAND ###
+
+br = api.namespace('brands', description='Operations related to brand table')
+@br.route('')
+class AllBrands(Resource):
+    
+    # GET ALL BRANDS
+    @api.doc(responses={404: 'Brands not found', 200: 'Ok'})
+    def get(self):
+        brands = Brand.query.all()
+        brands = list(map(lambda x: x.serialize(), brands))
+        
+        return jsonify(get_paginated_list(brands, '/brands', 
             start=request.args.get('start', 1), 
             limit=request.args.get('limit', 20)
     ))
