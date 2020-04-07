@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
-from models import db, Sizes_shoes, Product_detail, Product, Brand
+from models import db, Sizes_shoes, Product_detail, Product, Brand, Model_cat
 # import re
 # from alembic import op
 # from sqlalchemy import func
@@ -500,6 +500,66 @@ class AllProducts(Resource):
             limit=request.args.get('limit', 20)
     ))
         
+##### PRODUCTS BY BRAND SLUG AND MODEL SLUG #####
+@pr.route('/<string:brand_slug>/<string:model_slug>', '/<string:brand_slug>')
+@api.doc(params={'brand_slug': 'string'})
+class ProductsByBrandAndModelSlug(Resource): 
+    
+    #### GET PRODUCT DETAILS BY SLUG ####
+    @api.doc(responses={404: 'Slug not found', 200: 'Ok'})
+    def get(self, brand_slug: str, model_slug=None):
+        
+        brand = Brand.query.filter_by(slug=brand_slug).first() 
+        model = Model_cat.query.filter_by(slug=model_slug).first()    
+        if brand and not model:
+            products = Product.query.filter_by(brand_id=brand.id).all()
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                        
+                return jsonify(get_paginated_list(products,
+                    f'/{brand_slug}', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else:
+                abort(404)  
+        elif brand and model:
+            products = Product.query.filter_by(brand_id=brand.id, model_cat_id=model.id).all()
+            if products:
+                products = list(map(lambda x: x.serialize(), products))
+                        
+                return jsonify(get_paginated_list(products,
+                    f'/{brand_slug}/{model_slug}', 
+                    start=request.args.get('start', 1), 
+                    limit=request.args.get('limit', 20)
+                ))
+            else:
+                abort(404)
+        else: 
+            abort(404)
+            
+            
+##### PRODUCTS BY MODEL SLUG #####
+@pr.route('/model/<string:model_slug>')
+@api.doc(params={'model_slug': 'string'})
+class ProductsByModelSlug(Resource): 
+    
+    #### GET PRODUCT DETAILS BY MODEL SLUG ####
+    @api.doc(responses={404: 'Slug not found', 200: 'Ok'})
+    def get(self, model_slug: str):
+        
+        model = Model_cat.query.filter_by(slug=model_slug).first()    
+        products = Product.query.filter_by(model_cat_id=model.id).all()
+        if products:
+            products = list(map(lambda x: x.serialize(), products))
+                        
+            return jsonify(get_paginated_list(products,
+                f'/model/{model_slug}', 
+                start=request.args.get('start', 1), 
+                limit=request.args.get('limit', 20)
+            ))
+        else:
+            abort(404)    
         
         
         
@@ -524,6 +584,32 @@ class AllBrands(Resource):
             start=request.args.get('start', 1), 
             limit=request.args.get('limit', 20)
     ))
+        
+        
+        
+#######################################################
+#######################################################
+########################################################
+
+
+### API MODEL CATEGORY ###
+
+mc = api.namespace('model-category', description='Operations related to model category table')
+@mc.route('')
+class AllModels(Resource):
+    
+    # GET ALL BRANDS
+    @api.doc(responses={404: 'Models not found', 200: 'Ok'})
+    def get(self):
+        models = Model_cat.query.all()
+        models = list(map(lambda x: x.serialize(), models))
+        
+        return jsonify(get_paginated_list(models, '/model-category', 
+            start=request.args.get('start', 1), 
+            limit=request.args.get('limit', 20)
+    ))
+        
+
 
 
 ################ NEED TO CHECK ########################

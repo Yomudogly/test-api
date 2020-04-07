@@ -81,7 +81,7 @@ class Product(db.Model):
     name = db.Column(db.Unicode(100))
     brand_id = db.Column(db.Integer, ForeignKey('brand.id'))
     brand_name = db.Column(db.Unicode(50), nullable=True) # DUPLICAT of Brand row
-    model_cat_id = db.Column(db.Integer, nullable=True)  #ForeignKey('model_cat.id')
+    model_cat_id = db.Column(db.Integer, ForeignKey('model_cat.id'))
     model_cat_name = db.Column(db.Unicode(200), nullable=True) # DUPLICAT of Model_cat row
     brief_description = db.Column(LONGTEXT, nullable=True)
     description = db.Column(LONGTEXT, nullable=True)
@@ -174,6 +174,7 @@ class Brand(db.Model):
     
     product = db.relationship('Product', backref='brand', lazy=True)
     sizes_shoes = db.relationship('Sizes_shoes', backref='brand', lazy=True)
+    model_cat = db.relationship('Model_cat', backref='brand', lazy=True)
     
     def __repr__(self):
         return (f'Brand {self.name}')
@@ -197,4 +198,54 @@ class Brand(db.Model):
             "createdAt": self.created_at,
             "updatedAt": self.updated_at,
             "slug": self.slug 
+        }
+        
+        
+class Model_cat(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    brand_id = db.Column(db.Integer, ForeignKey('brand.id'))
+    model_cat_id = db.Column(db.Integer, nullable=True)
+    name = db.Column(db.Unicode(100))
+    slug_full = db.Column(db.Unicode(250), nullable=True)
+    description = db.Column(LONGTEXT, nullable=True)
+    seo_title = db.Column(db.Unicode(60), nullable=True)
+    seo_description = db.Column(db.Unicode(160), nullable=True)
+    seo_keywords = db.Column(LONGTEXT, nullable=True)
+    shortcut = db.Column(db.Unicode(200), nullable=True)
+    image = db.Column(db.Unicode(100), nullable=True)
+    favicon = db.Column(db.Unicode(100), nullable=True)
+    user_id = db.Column(db.Integer)      # ForeignKey('sf_guard_user.id')
+    status = db.Column(db.Integer, default=0, nullable=True)
+    rep_popular_brand = db.Column(db.Integer, default=0, nullable=True)
+    posicion_order = db.Column(db.Integer, default=0, nullable=True)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+    slug = db.Column(db.Unicode(255), nullable=True)
+    
+    product = db.relationship('Product', backref='model_cat', lazy=True)
+    
+    def __repr__(self):
+        return (f'Model category {self.name}')
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "brandId": self.brand_id,
+            "modelCatId": self.model_cat_id,
+            "name": self.name,
+            "slugFull": self.slug_full,
+            "description": self.description,
+            "seoTitle": self.seo_title,
+            "seoDesc": self.seo_description,
+            "seoKeywords": self.seo_keywords,
+            "shortcut": self.shortcut,
+            "image": self.image,
+            "favicon": self.favicon,
+            "userId": self.user_id,
+            "status": self.status,
+            "repPopularBrand": self.rep_popular_brand,
+            "positionOrder": self.posicion_order,
+            "createdAt": self.created_at,
+            "updatedAt": self.updated_at,
+            "slug": self.slug
         }
