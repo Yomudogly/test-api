@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
-from models import db, Sizes_shoes, Product_detail, Product, Brand, Model_cat
+from models import db, Sizes_shoes, Product_detail, Product, Brand, Model_cat, Media_storage
 # import re
 # from alembic import op
 # from sqlalchemy import func
@@ -609,6 +609,59 @@ class AllModels(Resource):
             limit=request.args.get('limit', 20)
     ))
         
+        
+        
+#######################################################
+#######################################################
+########################################################
+
+
+### API MEDIA STORAGE ###
+
+ms = api.namespace('media', description='Operations related to media storage table')
+@ms.route('')
+class AllMedia(Resource):
+    
+    # GET ALL BRANDS
+    @api.doc(responses={404: 'Media not found', 200: 'Ok'})
+    def get(self):
+        media = Media_storage.query.all()
+        media = list(map(lambda x: x.serialize(), media))
+        
+        return jsonify(get_paginated_list(media, '/media', 
+            start=request.args.get('start', 1), 
+            limit=request.args.get('limit', 20)
+    ))
+        
+    @api.doc(responses={404: 'Media not found', 200: 'Ok'})
+    @api.doc(params={'alt': 'string',
+                     'created_date': 'date',
+                     'description': 'string',
+                     'image': 'string',
+                     'pre_owned_id': 'integer',
+                     'product_id': 'integer',
+                     'sizes_shoes_val': 'integer',
+                     'status': 'integer',
+                     'thumbnail': 'string',
+                     'updated_at': 'date',
+                     'user_id': 'integer'})
+    def post(self):
+        body = request.get_json()
+        
+        media = Media_storage(alt=body['alt'], 
+                              created_at=body['created_at'], 
+                              description=body['description'], 
+                              image=body['image'],
+                              pre_owned_id=body['pre_owned_id'],
+                              product_id=body['product_id'],
+                              sizes_shoes_val=body['sizes_shoes_val'],
+                              status=body['status'],
+                              thumbnail=body['thumbnail'],
+                              updated_at=body['updated_at'],
+                              user_id=body['user_id'])
+        db.session.add(media)
+        db.session.commit()
+        return jsonify(media.serialize())
 
 
 

@@ -16,7 +16,7 @@ class Sizes_shoes(db.Model):
     inch = db.Column(db.Float(5,1))
     woman = db.Column(db.Float(5,1), nullable=True)
     position = db.Column(db.Unicode(50), nullable=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer)   # ForeignKey('sf_guard_user.id')
     user_name = db.Column(db.Unicode(100), nullable=True)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -248,4 +248,39 @@ class Model_cat(db.Model):
             "createdAt": self.created_at,
             "updatedAt": self.updated_at,
             "slug": self.slug
+        }
+        
+        
+class Media_storage(db.Model): 
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    alt = db.Column(db.Unicode(100), nullable=True)
+    created_at = db.Column(db.DateTime)
+    description = db.Column(db.Unicode(200), nullable=True)
+    image = db.Column(db.Unicode(100), nullable=True)
+    pre_owned_id = db.Column(db.Integer, nullable=True)
+    product_id = db.Column(db.Integer, nullable=True)
+    sizes_shoes_val = db.Column(db.Integer, nullable=True)
+    status = db.Column(db.Integer, default=0, nullable=True)
+    thumbnail = db.Column(db.Unicode(100), nullable=True)
+    updated_at = db.Column(db.DateTime)
+    user_id = db.Column(db.Integer)
+    
+    
+    def __repr__(self):
+        return (f'Media {self.alt}')
+    
+    def serialize(self): 
+        return {
+            "id": self.id,
+            "alt": self.alt,
+            "createdAt": self.created_at,
+            "description": self.description,
+            "image": self.image,
+            "preOwnedId": self.pre_owned_id,
+            "productId": self.product_id, 
+            "sizesShoesVal": self.sizes_shoes_val,
+            "status": self.status,
+            "thumbnail": self.thumbnail,
+            "updatedAt": self.updated_at,
+            "userId": self.user_id
         }
