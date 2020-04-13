@@ -635,15 +635,11 @@ class AllMedia(Resource):
             limit=request.args.get('limit', 20)
     ))
         
-    @api.doc(responses={404: 'Media not found', 200: 'Ok'})
+    @api.doc(responses={404: 'Media not posted', 200: 'Ok'})
     @api.doc(params={'alt': 'string',
-                     'description': 'string',
                      'image': 'string',
-                     'pre_owned_id': 'integer',
                      'product_id': 'integer',
                      'sizes_shoes_val': 'integer',
-                     'status': 'integer',
-                     'thumbnail': 'string',
                      'user_id': 'integer'})
     def post(self):
         body = request.get_json()
@@ -651,14 +647,10 @@ class AllMedia(Resource):
         # decoded = base64.b64decode(body['image']) - incase to encode in binary
         media = Media_storage(
             alt=body['alt'], 
-            created_at=today, 
-            description=body['description'], 
+            created_at=today,  
             image=body['image'],
-            pre_owned_id=body['pre_owned_id'],
             product_id=body['product_id'],
             sizes_shoes_val=body['sizes_shoes_val'],
-            status=body['status'],
-            thumbnail=body['thumbnail'],
             updated_at=today,
             user_id=body['user_id'])
         db.session.add(media)
