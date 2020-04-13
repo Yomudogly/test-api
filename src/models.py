@@ -111,6 +111,7 @@ class Product(db.Model):
     slug = db.Column(db.Unicode(255), nullable=True)
     
     product_details = db.relationship('Product_detail', backref='product', lazy=True)
+    media_storage = db.relationship('Media_storage', backref='product', lazy=True)
     
     
     def __repr__(self):
@@ -256,9 +257,9 @@ class Media_storage(db.Model):
     alt = db.Column(db.Unicode(100), nullable=True)
     created_at = db.Column(db.DateTime)
     description = db.Column(db.Unicode(200), nullable=True)
-    image = db.Column(db.Unicode(100), nullable=True)
+    image = db.Column(LONGTEXT, nullable=True)
     pre_owned_id = db.Column(db.Integer, nullable=True)
-    product_id = db.Column(db.Integer, nullable=True)
+    product_id = db.Column(db.Integer, ForeignKey('product.id'))
     sizes_shoes_val = db.Column(db.Integer, nullable=True)
     status = db.Column(db.Integer, default=0, nullable=True)
     thumbnail = db.Column(db.Unicode(100), nullable=True)

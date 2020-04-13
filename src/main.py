@@ -9,6 +9,8 @@ from flask_restx import Api, Resource, abort
 from flask_cors import CORS
 from utils import APIException
 from models import db, Sizes_shoes, Product_detail, Product, Brand, Model_cat, Media_storage
+from datetime import date
+# import base64
 # import re
 # from alembic import op
 # from sqlalchemy import func
@@ -635,7 +637,6 @@ class AllMedia(Resource):
         
     @api.doc(responses={404: 'Media not found', 200: 'Ok'})
     @api.doc(params={'alt': 'string',
-                     'created_date': 'date',
                      'description': 'string',
                      'image': 'string',
                      'pre_owned_id': 'integer',
@@ -643,22 +644,23 @@ class AllMedia(Resource):
                      'sizes_shoes_val': 'integer',
                      'status': 'integer',
                      'thumbnail': 'string',
-                     'updated_at': 'date',
                      'user_id': 'integer'})
     def post(self):
         body = request.get_json()
-        
-        media = Media_storage(alt=body['alt'], 
-                              created_at=body['created_at'], 
-                              description=body['description'], 
-                              image=body['image'],
-                              pre_owned_id=body['pre_owned_id'],
-                              product_id=body['product_id'],
-                              sizes_shoes_val=body['sizes_shoes_val'],
-                              status=body['status'],
-                              thumbnail=body['thumbnail'],
-                              updated_at=body['updated_at'],
-                              user_id=body['user_id'])
+        today = date.today()
+        # decoded = base64.b64decode(body['image']) - incase to encode in binary
+        media = Media_storage(
+            alt=body['alt'], 
+            created_at=today, 
+            description=body['description'], 
+            image=body['image'],
+            pre_owned_id=body['pre_owned_id'],
+            product_id=body['product_id'],
+            sizes_shoes_val=body['sizes_shoes_val'],
+            status=body['status'],
+            thumbnail=body['thumbnail'],
+            updated_at=today,
+            user_id=body['user_id'])
         db.session.add(media)
         db.session.commit()
         return jsonify(media.serialize())
