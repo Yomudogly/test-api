@@ -2,8 +2,8 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from sqlalchemy import desc
 from datetime import date
+from sqlalchemy import desc
 from flask import Flask, request, jsonify, Blueprint
 from flask_migrate import Migrate
 from flask_restx import Api, Resource, abort
