@@ -1,5 +1,12 @@
 [MASTER]
 
+disable=
+    C0114, # missing-module-docstring
+    C0115, # missing-class-docstring
+    C0116, # missing-function-docstring
+    C0103,
+    E1101,
+   
 # Specify a configuration file.
 #rcfile=
 
